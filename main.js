@@ -6,34 +6,34 @@ var bot = new Discord.Client({
   autorun: true
 });
 
-bot.on('ready', function(evt) {
+bot.on('ready', function (evt) {
   console.log('Bot is running...');
 });
 
-bot.on('message', function(user, userID, channelID, message, evt) {
+bot.on('message', function (user, userID, channelID, message, evt) {
 
   //Help command
   if (message.substring(0, 5) == '!help') {
     bot.sendMessage({
       to: channelID,
       message:
-        'Hi I am movie-bot! \nHere are the commands I respond to: \n \n' +
-        '**!movie [movie title]** : Searches for a movie and displays information about it.'
+        'Hi I am movie-bot! \nHere are the commands I respond to: \n\n' +
+        '**!movie [movie title]** : Searches for a movie and displays information about it.\n\n' +
+        '**!actor [actor name]**: Searches for an actor and displays information about him/her.'
     });
   }
 
-  // Searches for movies and shows the title + poster
+  // Searches for movies and shows info + poster
   if (message.substring(0, 6) == '!movie') {
     var searchText = message.substring(7);
     axios
-      .get('http://www.omdbapi.com/?apikey=4ce155b0&s=' + searchText)
+      .get('httuisp://www.omdbapi.com/?apikey=4ce155b0&s=' + searchText)
       .then(response => {
         let result = response.data.Search[0];
         axios
           .get('http://www.omdbapi.com/?apikey=4ce155b0&t=' + result.Title)
           .then(response2 => {
             let movie = response2.data;
-            let output = '';
             bot.sendMessage({
               to: channelID,
               message:
@@ -62,11 +62,38 @@ bot.on('message', function(user, userID, channelID, message, evt) {
                 movie.Poster
             });
           });
+      })
+      .catch(err => {
+        bot.sendMessage({ to: channelID, message: 'Movie **' + searchText + '** was not found.' });
       });
   }
 
-  if (message.substring(0, 6) == "!actor") {
+  // Searches for an actor and shows info + poster
+  if (message.substring(0, 6) == '!actor') {
     var searchText = message.substring(7);
-    axios.get('https://api.themoviedb.org/3/people/?api_key=ca9c5a2b63d0b172a3f9a20ac0ad2079')
+    axios
+      .get('https://api.themoviedb.org/3/search/person?api_key=ca9c5a2b63d0b172a3f9a20ac0ad2079&query=' + searchText)
+      .then(response => {
+        let actor = response.data.results[0];
+        let knownFor = '';
+        let actorPoster = 'http://image.tmdb.org/t/p/w185' + actor.profile_path;
+        for (let i = 0; i < actor.known_for.length; i++) {
+          if (i == 0) {
+            knownFor += actor.known_for[i].title;
+          } else {
+            knownFor += ', ' + actor.known_for[i].title;
+          }
+        }
+        bot.sendMessage({
+          to: channelID,
+          message:
+            '**Name: **' + actor.name +
+            '\n**Known for: **' + knownFor +
+            '\n' + actorPoster
+        });
+      })
+      .catch(err => {
+        bot.sendMessage({ to: channelID, message: 'Actor **' + searchText + '** was not found.' });
+      });
   }
 });
