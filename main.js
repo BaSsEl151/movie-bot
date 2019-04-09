@@ -4,7 +4,7 @@ var YouTube = require('youtube-node');
 
 // Create bot
 var bot = new Discord.Client({
-  token: 'NDU2MjMwMDQzMjg3NTUyMDAz.DgHg2w.7aMU-vJXqBo9Cu2XOBo9nb00LhM',
+  token: '',
   autorun: true
 });
 
